@@ -19,8 +19,9 @@ tips:
 2. 下载BERt模型放到./1_算法示例下，下载链接：
 3. 配置环境环境：conda install --yes --file requirements.txt
 4. 下载已训练好的模型文件，用于直接运行solution.py文件进行测试
-   1. ***_ner.pth文件，放置于路径models/sequence_labeling/,下载链接：
-   2. ***_rel.pth文件，放置于路径models/rel_cls/,下载链接：
+   1. ***_ner.pth文件，放置于路径models/sequence_labeling/
+   2. ***_rel.pth文件，放置于路径models/rel_cls/
+   3. 下载路径：https://github.com/KaiserLord/bigFiles/tree/master/models
 
 
 ### 运行的环境
