@@ -17,8 +17,10 @@ tips:
 ### 模型下载之后
 1. 由于在github上无法通过引用的方式使用其他仓库的BERT等大型文件，所以建议离线运行
 2. 下载BERt模型放到./1_算法示例下，下载链接：
-3. 从文件中下载环境：conda install --yes --file requirements.txt
-4. 
+3. 配置环境环境：conda install --yes --file requirements.txt
+4. 下载已训练好的模型文件，用于直接运行solution.py文件进行测试
+   1. ***_ner.pth文件，放置于路径models/sequence_labeling/,下载链接：
+   2. ***_rel.pth文件，放置于路径models/rel_cls/,下载链接：
 
 
 ### 运行的环境
