@@ -45,7 +45,6 @@ def get_entities(pred_ner, text):
             j += 1
     return token_types, entities
 
-
 def test():
     print("命名实体识别：")
     test_path = './1_算法示例/data/test_data.json'
@@ -58,25 +57,35 @@ def test():
     
     ner_data_process = ModelDataPreparation(config_ner)
     _, _, test_loader = ner_data_process.get_train_dev_data(path_test=test_path)
+    
+    # 更改输入方式
+
     trainerNer = trainer_ner.Trainer(ner_model, config_ner, test_dataset=test_loader)
     pred_ner = trainerNer.predict()
-    print(pred_ner)
+    # print(pred_ner)
     text = None
     for data_item in test_loader:
         text = data_item['text']
     token_types, entities = get_entities(pred_ner, text)
-    print(token_types)
+    # print(token_types)
+    print('识别出来的实体如下:')
     print(entities)
     
     rel_list = []
+    # 把从test json文件中选取的三含数据中抽取出来的实体，按格式写入rel_predict.json文件中
     with open('./1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
         for i in range(len(pred_ner)):
             texti = text[i]
-            for j in range(len(entities[i])):
+            for j in range(len(entities[i])): # entities是二维数组
                 for k in range(len(entities[i])):
                     if j == k:
                         continue
-                    rel_list.append({"text":texti, "spo_list":{"subject": entities[i][j], "object": entities[i][k]}})
+                    # rel_list.append({"text":texti, "spo_list":{"subject": entities[i][j], "object": entities[i][k]}})
+                    subject = entities[i][j]
+                    object = entities[i][k]
+                    relation = ''
+                    sentence_cls = ''.join([subject, object, texti])
+                    rel_list.append({"sentence_cls":sentence_cls, 'relation': relation, 'text': texti, "subject": subject, "object": object})
         json.dump(rel_list, f, ensure_ascii=False)
 
     print("实体关系抽取：")
@@ -84,7 +93,7 @@ def test():
     PATH_REL = './1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
     
     config_rel = ConfigRel()
-    config_rel.batch_size = 8
+    # config_rel.batch_size = 8
     rel_model = BertForSequenceClassification.from_pretrained('./1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
     rel_model_dict = torch.load(PATH_REL)
     rel_model.load_state_dict(rel_model_dict['state_dict'])
@@ -92,9 +101,13 @@ def test():
 
     rel_data_process = DataPreparationRel(config_rel)
     _, _, test_loader = rel_data_process.get_train_dev_data(path_test=rel_test_path) # 测试数据
+
+    # test_loader = rel_data_process.process_test_data(rel_test_path)
     trainREL = trainer_rel.Trainer(rel_model, config_rel, test_dataset=test_loader)
     rel_pred = trainREL.bert_predict()
-    print(rel_pred)
+    # print(rel_pred)
+    return rel_pred
 
 if __name__ == '__main__':
-    test()
+    res = test()
+    print(res)

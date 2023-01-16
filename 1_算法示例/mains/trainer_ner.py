@@ -125,8 +125,8 @@ class Trainer:
         self.model.train(True)
         token_pred = [[] for _ in range(len(pred_ner))]
         for i in range(len(pred_ner)):
-            for item in pred_ner[i]:
-                token_pred[i].append(self.id2token_type[item])
+            for item in pred_ner[i]: #len(pred_ner[i])==74,根据不同的数据集，得到最大的长度
+                token_pred[i].append(self.id2token_type[item]) #根据模型得到的pred_ner数组，在id2token_type数组中找到pred_ner[i]对应的BIO做预测结果
         return token_pred
 
     def predict_sample(self):

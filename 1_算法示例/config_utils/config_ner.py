@@ -25,7 +25,8 @@ class ConfigNer:
                  embedding_dim=32,
                  hidden_dim_lstm=128,
                  num_layers=3,
-                 batch_size=8,
+                #  batch_size=8,
+                batch_size=1,
                  layer_size=16,
                  token_type_dim=8
                  ):

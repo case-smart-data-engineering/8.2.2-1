@@ -59,12 +59,12 @@ class DataPreparationRel:
                             'subject': subject, 'object': object}  # 'position_s': position_s, 'position_o': position_o}
                     data.append(item)
                 # 添加负样本
-                sentence_neg = '$'.join([object, subject, text])
-                # sentence_neg = '$'.join(
-                #     [object, subject, text.replace(subject, '#' * len(subject)).replace(object, '#' * len(object))])
-                item_neg = {'sentence_cls': sentence_neg, 'relation': 'N', 'text': text,
-                             'subject': object, 'object': subject}
-                data.append(item_neg)
+                # sentence_neg = '$'.join([object, subject, text])
+                # # sentence_neg = '$'.join(
+                # #     [object, subject, text.replace(subject, '#' * len(subject)).replace(object, '#' * len(object))])
+                # item_neg = {'sentence_cls': sentence_neg, 'relation': 'N', 'text': text,
+                #              'subject': object, 'object': subject}
+                # data.append(item_neg)
         
         dataset = Dataset(data)
         if is_test:
@@ -99,6 +99,84 @@ class DataPreparationRel:
             test_loader = self.get_data(path_test, is_test=False)
     
         return train_loader, dev_loader, test_loader
+
+    def process_test_data(self, file_path, is_test=False):
+        train_loader, dev_loader, test_loader = None, None, None
+        data = []
+        cnt = 0
+        with open(file_path, 'r', encoding='utf-8')as f:
+            for line in f:
+                cnt += 1
+                if cnt > self.config.num_sample:
+                    break
+                data_item = json.loads(line)
+                # spolist = data_item['spo_list']
+                for item in data_item:
+                    text = item['text']
+                    text = text.lower()
+                    # for spo_item in spolist:
+
+                    subject = item["subject"]
+                    subject = subject.lower()
+                    object = item["object"]
+                    object = object.lower()
+                    # 增加位置信息
+                    # index_s = text.index(subject)
+                    # index_o = text.index(object)
+                    # position_s, position_o = [], []
+                    # for i, word in enumerate(text):
+                    #     if word not in self.word2id:
+                    #         continue
+                    #     position_s.append(i-index_s+self.config.max_seq_length*2)
+                    #     position_o.append(i-index_o+self.config.max_seq_length*2)
+                    if not is_test:
+                        relation = item['relation']
+                        if self.rel_cnt[relation] > self.config.rel_num:
+                            continue
+                        self.rel_cnt[relation] += 1
+
+                    else:
+                        relation = []
+                    # sentence_cls = '$'.join([subject, object, text.replace(subject, '#'*len(subject)).replace(object, '#'*len(object))])
+                    sentence_cls = ''.join([subject, object, text])
+                    # sentence_cls = text
+                    item_i = {'sentence_cls': sentence_cls, 'relation': relation, 'text': text,
+                            'subject': subject, 'object': object}  # 'position_s': position_s, 'position_o': position_o}
+                    data.append(item_i)
+
+                # 添加负样本
+                # sentence_neg = '$'.join([object, subject, text])
+                # # sentence_neg = '$'.join(
+                # #     [object, subject, text.replace(subject, '#' * len(subject)).replace(object, '#' * len(object))])
+                # item_neg = {'sentence_cls': sentence_neg, 'relation': 'N', 'text': text,
+                #              'subject': object, 'object': subject}
+                # data.append(item_neg)
+        
+        dataset = Dataset(data)
+        if is_test:
+            dataset.is_test = True
+        data_loader = torch.utils.data.DataLoader(
+            dataset=dataset,
+            batch_size=self.config.batch_size,
+            collate_fn=dataset.collate_fn,
+            shuffle=True,
+            drop_last=True
+        )
+        
+        return data_loader
+    
+        dataset = Dataset(data)
+        if is_test:
+            dataset.is_test = True
+        data_loader = torch.utils.data.DataLoader(
+            dataset=dataset,
+            batch_size=self.config.batch_size,
+            collate_fn=dataset.collate_fn,
+            shuffle=True,
+            drop_last=True
+        )
+        
+        return data_loader
     
     
 class Dataset(torch.utils.data.Dataset):

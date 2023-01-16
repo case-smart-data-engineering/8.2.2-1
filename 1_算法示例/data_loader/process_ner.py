@@ -123,11 +123,11 @@ class ModelDataPreparation:
                     if have_error:
                         continue
                 item = {'text_tokened': text_tokened, 'token_type_list': token_type_list}
-                item['text_tokened'] = [self.token2id[x] for x in item['text_tokened']]
+                item['text_tokened'] = [self.token2id[x] for x in item['text_tokened']] # 每个字对应的id
                 if not is_test:
                     item['token_type_list'] = [self.token_type2id[x] for x in item['token_type_list']]
                 item['text'] = ''.join(text_tokened)  # 保存消除异常词汇的文本
-                item['spo_list'] = spo_list
+                item['spo_list'] = spo_list # 测试过程中，把spo_list遮蔽
                 item['token_type_origin'] = token_type_origin
                 data.append(item)
         dataset = Dataset(data)
@@ -151,7 +151,43 @@ class ModelDataPreparation:
             test_loader = self.get_data(path_test, is_test=True)
         
         return train_loader, dev_loader, test_loader
-        
+    
+    def process_test_data(self, sentence, is_test=False):
+        # test_loader = self.get_data(path_test, is_test=True)
+        text = sentence
+        data = []
+        text_tokened = [c.lower() for c in text]
+        token_type_list, token_type_origin = None, None
+
+        spo_list = []
+        text_tokened = self.get_rid_unkonwn_word(text_tokened)
+        if not is_test:
+            token_type_list, have_error = self.subject_object_labeling(
+                spo_list=spo_list, text=text, text_tokened=text_tokened
+            )
+            token_type_origin = token_type_list  # 保存没有数值化前的token_type
+            if have_error:
+                pass
+        item = {'text_tokened': text_tokened, 'token_type_list': token_type_list}
+        item['text_tokened'] = [self.token2id[x] for x in item['text_tokened']] # 每个字对应的id
+        if not is_test:
+            item['token_type_list'] = [self.token_type2id[x] for x in item['token_type_list']]
+        item['text'] = ''.join(text_tokened)  # 保存消除异常词汇的文本
+        item['spo_list'] = spo_list # 测试过程中，把spo_list遮蔽
+        item['token_type_origin'] = token_type_origin
+
+        data.append(item)
+        dataset = Dataset(data)
+        if is_test:
+            dataset.is_test = True
+        data_loader = torch.utils.data.DataLoader(
+            dataset=dataset,
+            batch_size=self.config.batch_size,
+            collate_fn=dataset.collate_fn,
+            drop_last=True
+        )
+        return data_loader
+    
 
 class Dataset(torch.utils.data.Dataset):
     def __init__(self, data):

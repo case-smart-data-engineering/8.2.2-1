@@ -180,15 +180,17 @@ class Trainer:
         print("predict rel: {}".format(self.id2rel[int(pred_rel[1])]))
         return correct_ave
 
-    def bert_predict(self):
+    def bert_predict2(self):
         print('STARTING PREDICTING...')
         self.model.train(False)
         pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
         # print(type(pbar))
+        pred_list = []
         for i, data_item in pbar:
             output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'])
             logits = output[0]
             _, pred_rel = torch.max(logits.data, 1)
+            pred_list.append(pred_rel)
 
         self.model.train(True)
         # rel_pred = [[] for _ in range(len(pred_rel))]
@@ -198,6 +200,29 @@ class Trainer:
             rel_pred.append(self.id2rel[int(pred_rel[i])])
         return rel_pred
 
+    def bert_predict(self):
+        print('STARTING PREDICTING...')
+        self.model.train(False)
+        pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
+        # print(type(pbar))
+        result = []
+        pred_list = []
+        for i, data_item in pbar:
+            output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'])
+            logits = output[0]
+            _, pred_rel = torch.max(logits.data, 1)
+            pred_list.append(pred_rel)
+            result.append([data_item['subject'], '', data_item['object']]) #三元组
+
+        self.model.train(True)
+        # rel_pred = [[] for _ in range(len(pred_rel))]
+        # rel_pred = []
+        for i in range(len(pred_list)):
+            # for item in pred_rel[i]:
+            # rel_pred.append(self.id2rel[int(pred_list[i])])
+            # 可以在这里更改一下输出的格式
+            result[i][1] = self.id2rel[int(pred_list[i])]
+        return result
 
 def get_embedding_pre():
     
@@ -238,5 +263,6 @@ if __name__ == '__main__':
 
     trainer = Trainer(model, config, train_loader, dev_loader, test_loader)
     trainer.bert_train()
+    
     
 
