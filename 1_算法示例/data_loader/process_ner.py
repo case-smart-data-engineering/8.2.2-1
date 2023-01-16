@@ -7,7 +7,7 @@ import json
 import torch
 import copy
 import sys
-sys.path.append('./1_算法示例/')
+sys.path.append('D:/GitHub/8.2.2-1/1_算法示例/')
 
 from config_utils.config_ner import ConfigNer, USE_CUDA
 

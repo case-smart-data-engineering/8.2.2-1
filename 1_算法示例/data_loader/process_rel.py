@@ -10,7 +10,7 @@ import copy
 from transformers import BertTokenizer
 import codecs
 from collections import defaultdict
-
+basepath = 'D:/GitHub/8.2.2-1/'
 
 class DataPreparationRel:
     def __init__(self, config):
@@ -82,7 +82,7 @@ class DataPreparationRel:
     def get_token2id(self):
         self.word2id = {}
         
-        with codecs.open('./1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+        with codecs.open(basepath+'/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
             cnt = 0
             for line in f.readlines():
                 self.word2id[line.split()[0]] = cnt
@@ -184,15 +184,15 @@ class Dataset(torch.utils.data.Dataset):
         self.data = copy.deepcopy(data)
         self.is_test = False
 
-        with open('./1_算法示例/data_loader/rel2id.json', 'r', encoding='utf-8') as f:
+        with open(basepath+'/1_算法示例/data_loader/rel2id.json', 'r', encoding='utf-8') as f:
             self.rel2id = json.load(f)
         # 在此处添加bert模型的vocab的路径
-        vocab_file = './1_算法示例/bert-base-chinese/vocab.txt'
+        vocab_file = basepath+'/1_算法示例/bert-base-chinese/vocab.txt'
         self.bert_tokenizer = BertTokenizer.from_pretrained(vocab_file)
 
     def get_token2id(self):
         self.word2id = {}
-        with codecs.open('./1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+        with codecs.open(basepath+'/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
             cnt = 0
             for line in f.readlines():
                 self.word2id[line.split()[0]] = cnt
@@ -274,7 +274,7 @@ if __name__ == '__main__':
     config = ConfigRel()
     process = DataPreparationRel(config)
 
-    train_loader, dev_loader, test_loader = process.get_train_dev_data('./1_算法示例/data/train_data.json')
+    train_loader, dev_loader, test_loader = process.get_train_dev_data(basepath+'/1_算法示例/data/train_data.json')
     
     for item in train_loader:
         print(item)

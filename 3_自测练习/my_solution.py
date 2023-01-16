@@ -2,7 +2,8 @@
 import torch
 import sys
 
-sys.path.append('./1_算法示例/')
+sys.path.append('D:/GitHub/8.2.2-1/1_算法示例/')
+# print(sys.path)
 from modules.model_ner import SeqLabel
 from modules.model_rel import AttBiLSTM
 from config_utils.config_rel import ConfigRel, USE_CUDA
@@ -54,8 +55,8 @@ def get_entities(pred_ner, text):
 
 def test():
     # print("命名实体识别：")
-    test_path = './1_算法示例/data/test_data.json'
-    PATH_NER = './1_算法示例/models/sequence_labeling/52m-f54.81n7192.16ccks2019_ner.pth'
+    test_path = 'D:/GitHub/8.2.2-1/1_算法示例/data/test_data.json'
+    PATH_NER = 'D:/GitHub/8.2.2-1/1_算法示例/models/sequence_labeling/52m-f54.81n7192.16ccks2019_ner.pth'
     
     config_ner = ConfigNer()
     ner_model = SeqLabel(config_ner)
@@ -80,7 +81,7 @@ def test():
     
     rel_list = []
     # 把从test json文件中选取的三含数据中抽取出来的实体，按格式写入rel_predict.json文件中
-    with open('./1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
+    with open('D:/GitHub/8.2.2-1/1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
         for i in range(len(pred_ner)):
             texti = text[i]
             for j in range(len(entities[i])): # entities是二维数组
@@ -97,14 +98,14 @@ def test():
 
     print("实体关系抽取：")
     # # 加载模型参数
-    PATH_REL = './1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
+    PATH_REL = 'D:/GitHub/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
-    rel_model = BertForSequenceClassification.from_pretrained('./1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
+    rel_model = BertForSequenceClassification.from_pretrained('D:/GitHub/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
     rel_model_dict = torch.load(PATH_REL)
     rel_model.load_state_dict(rel_model_dict['state_dict'])
-    rel_test_path = './1_算法示例/data/test_data.json' 
+    rel_test_path = 'D:/GitHub/8.2.2-1/1_算法示例/data/test_data.json' 
 
     rel_data_process = DataPreparationRel(config_rel)
     _, _, test_loader = rel_data_process.get_train_dev_data(path_test=rel_test_path) # 测试数据

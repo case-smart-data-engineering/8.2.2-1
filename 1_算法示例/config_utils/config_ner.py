@@ -48,7 +48,7 @@ class ConfigNer:
          '影视作品', '景点', '机构', '歌曲', '气候', '生物', '电视综艺', '目', '网站', '网络小说', '行政区', '语言', '音乐专辑']
         self.token_types = self.get_token_types()
         self.num_token_type = len(self.token_types)
-        self.vocab_file = './1_算法示例/data/vocab.txt'
+        self.vocab_file = 'D:/GitHub/8.2.2-1/1_算法示例/data/vocab.txt'
         
         
         self.max_seq_length = 256
@@ -62,7 +62,7 @@ class ConfigNer:
         self.use_dropout = True
         self.threshold_rel = 0.95  # 从0.7到0.95
         self.teach_rate = 0.2
-        self.ner_checkpoint_path = './1_算法示例/models/sequence_labeling/'
+        self.ner_checkpoint_path = 'D:/GitHub/8.2.2-1/1_算法示例/models/sequence_labeling/'
     
     def get_token_types(self):
         token_type_bio = []
