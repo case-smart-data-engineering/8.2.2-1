@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import sys
 import torch
-from my_solution import test, solution
+from my_solution import test
 
 
 # 测试用例
@@ -12,5 +12,5 @@ def test_solution():
 
 
 
-# if __name__ == '__main__':
-#     test_solution()
+if __name__ == '__main__':
+    test_solution()

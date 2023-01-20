@@ -66,10 +66,12 @@ def test():
     ner_data_process = ModelDataPreparation(config_ner)
     _, _, test_loader = ner_data_process.get_train_dev_data(path_test=test_path)
     
-    # 更改输入方式
-
+    # 补全1
     trainerNer = trainer_ner.Trainer(ner_model, config_ner, test_dataset=test_loader)
-    pred_ner = trainerNer.predict()
+    # pred_ner = trainerNer.predict()
+    raise NotImplementedError('补全输入方式')
+
+
     # print(pred_ner)
     text = None
     for data_item in test_loader:
@@ -98,7 +100,7 @@ def test():
 
     print("实体关系抽取：")
     # # 加载模型参数
-    PATH_REL = 'D:/GitHub/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
+    PATH_REL = 'D:/GitHub/8.2.2-1/3_自测练习/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
@@ -111,7 +113,11 @@ def test():
     _, _, test_loader = rel_data_process.get_train_dev_data(path_test=rel_test_path) # 测试数据
 
     trainREL = trainer_rel.Trainer(rel_model, config_rel, test_dataset=test_loader)
-    rel_pred = trainREL.bert_predict()
+    
+    # 补全2
+    # rel_pred = trainREL.bert_predict()
+    raise NotImplementedError('补全输入方式')
+    
     return rel_pred
 
 
