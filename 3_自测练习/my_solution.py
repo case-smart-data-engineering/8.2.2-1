@@ -100,7 +100,7 @@ def test():
 
     print("实体关系抽取：")
     # # 加载模型参数
-    PATH_REL = 'D:/GitHub/8.2.2-1/3_自测练习/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
+    PATH_REL = 'D:/GitHub/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
