@@ -14,11 +14,10 @@ tips:
 2. 另一个方式是使用GPU加速运行，可大幅缩减时间
 
 
-### 模型下载之后
+### 模型下载
 1. 由于在github上无法通过引用的方式使用其他仓库的BERT等大型文件，所以建议离线运行
-2. 下载BERt模型放到./1_算法示例下，下载链接：
-3. 配置环境环境：conda install --yes --file requirements.txt
-4. 下载已训练好的模型文件，用于直接运行solution.py文件进行测试
+2. 下载BERt模型放到./1_算法示例下，运行代码即可下载
+3. 下载已训练好的模型文件，用于直接运行solution.py文件进行测试
    1. ***_ner.pth文件，放置于路径models/sequence_labeling/
    2. ***_rel.pth文件，放置于路径models/rel_cls/
    3. 下载路径：https://github.com/KaiserLord/bigFiles/tree/master/models
@@ -44,18 +43,17 @@ pytorch-transformers==1.2.0
 4. 已经通过git lfs 上传模型文件至github上，gitpod无法访问，显示的是指针型文件，需要手动从github上下载放置于指定路径中或者将本项目克隆到本地运行。
 
 > 如果是在gitpod上运行，按以下步骤操作：
-> 下载预训练模型'1m-acc0.79ccks2019_rel.pth'放置于'1_算法示例/models/rel_cls/'下,下载链接：
-> [https://github.com/case-smart-data-engineering/6.4.4-1/blob/main/1_%E7%AE%97%E6%B3%95%E7%A4%BA%E4%BE%8B/train/model/bert_pretrain/pytorch_model.bin]
+> 下载预训练模型'*.pth'放置于'1_算法示例/models/'下,
 > 如果是克隆到本地运行，按以下步骤操作：
 > 直接把下载的pth文件复制粘贴于'1_算法示例/models/rel_cls/'下。
 
-5. 对于数据部分，由于github的限制，以及对想要测试模型的读者，github的项目中存放的是原始数据集的切片，这样便于在线化运行。
+1. 对于数据部分，由于github的限制，以及对想要测试模型的读者，github的项目中存放的是原始数据集的切片，这样便于在线化运行。
 如果有想要全部数据集的读者，可以从[https://pan.baidu.com/s/1XK3v6BQlnsvhGxgg-71IpA]下载json文件，密码'nlp0'，放置于`1_算法示例/data/`
 
-6. 训练
+1. 训练
 Bert模型使用的是huggingface的Bert-base模型，命名实体部分的训练，直接运行mains/train_ner.py，关系抽取部分的训练，直接运行mains/train_rel.py
 
-7. 测试
+1. 测试
 直接运行solution/solution.py，会首先进行命名实体识别，然后将实体两两组成实体对进行关系分类。
 
 

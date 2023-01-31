@@ -129,5 +129,7 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-models/
+models/rel_cls/*.pth
+models/sequence_labeling/*.pth
 bert-base-chinese/
+
