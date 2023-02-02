@@ -4,7 +4,7 @@ import torch
 import torch.nn as nn
 from tqdm import tqdm
 
-sys.path.append('./1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 from config_utils.config_rel import ConfigRel, USE_CUDA
 from modules.model_rel import AttBiLSTM
 from data_loader.process_rel import DataPreparationRel
@@ -227,14 +227,14 @@ class Trainer:
 def get_embedding_pre():
     
     word2id = {}
-    with codecs.open('./1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+    with codecs.open('/workspace/8.2.2-1/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
         cnt = 0
         for line in f.readlines():
             word2id[line.split()[0]] = cnt
             cnt += 1
 
     word2vec = {}
-    with codecs.open('./1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+    with codecs.open('/workspace/8.2.2-1/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
         for line in f.readlines():
             word2vec[line.split()[0]] = list(map(eval, line.split()[1:]))
         unkown_pre = []
@@ -254,12 +254,12 @@ if __name__ == '__main__':
 
     print("Run EntityRelationExtraction REL BERT ...")
     config = ConfigRel()
-    model = BertForSequenceClassification.from_pretrained('./1_算法示例/bert-base-chinese', num_labels=config.num_relations)
+    model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config.num_relations)
     data_processor = DataPreparationRel(config)
     train_loader, dev_loader, test_loader = data_processor.get_train_dev_data(
-        './1_算法示例/data/train_data.json', 
-        './1_算法示例/data/dev_data.json', 
-        './1_算法示例/data/test_data.json')
+        '/workspace/8.2.2-1/1_算法示例/data/train_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/dev_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/test_data.json')
 
     trainer = Trainer(model, config, train_loader, dev_loader, test_loader)
     trainer.bert_train()

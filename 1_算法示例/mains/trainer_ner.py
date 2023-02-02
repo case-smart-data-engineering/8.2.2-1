@@ -4,7 +4,7 @@ import torch.nn.functional as F
 from tqdm import tqdm
 import sys
 
-sys.path.append('./1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 from config_utils.config_ner import ConfigNer, USE_CUDA
 from modules.model_ner import SeqLabel
 from data_loader.process_ner import ModelDataPreparation
@@ -154,8 +154,8 @@ if __name__ == '__main__':
     model = SeqLabel(config)
     data_processor = ModelDataPreparation(config)
     train_loader, dev_loader, test_loader = data_processor.get_train_dev_data(
-        './1_算法示例/data/train_data.json', 
-        './1_算法示例/data/dev_data.json', 
-        './1_算法示例/data/test_data.json')
+        '/workspace/8.2.2-1/1_算法示例/data/train_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/dev_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/test_data.json')
     trainer = Trainer(model, config, train_loader, dev_loader, test_loader)
     trainer.train()

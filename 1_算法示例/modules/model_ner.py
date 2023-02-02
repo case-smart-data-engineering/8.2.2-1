@@ -5,7 +5,7 @@ from torchcrf import CRF
 import numpy as np
 import sys
 
-sys.path.append('./1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 from config_utils.config_ner import USE_CUDA
 # BiLSTM+CRF
 

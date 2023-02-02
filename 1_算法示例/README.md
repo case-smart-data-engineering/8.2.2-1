@@ -26,7 +26,7 @@ tips:
 ### 运行的环境
 ```
 Python==3.7.15
-pytorch==1.5.1
+torch==1.5.1
 pytorch-crf==0.7.2
 pytorch-transformers==1.2.0
 ```
