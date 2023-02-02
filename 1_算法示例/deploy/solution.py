@@ -93,7 +93,7 @@ def test():
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
-    rel_model = BertForSequenceClassification.from_pretrained('bert-base-chinese', num_labels=config_rel.num_relations)
+    rel_model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
     rel_model_dict = torch.load(PATH_REL, map_location ='cpu')
     print(rel_model_dict.keys())
     rel_model.load_state_dict(rel_model_dict['state_dict'], False)

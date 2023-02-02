@@ -2,7 +2,7 @@
 import torch
 import sys
 
-sys.path.append('D:/GitHub/8.2.2-1/1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 # print(sys.path)
 from modules.model_ner import SeqLabel
 from modules.model_rel import AttBiLSTM
@@ -55,21 +55,21 @@ def get_entities(pred_ner, text):
 
 def test():
     # print("命名实体识别：")
-    test_path = 'D:/GitHub/8.2.2-1/1_算法示例/data/test_data.json'
-    PATH_NER = 'D:/GitHub/8.2.2-1/1_算法示例/models/sequence_labeling/52m-f54.81n7192.16ccks2019_ner.pth'
+    test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json'
+    PATH_NER = '/workspace/8.2.2-1/1_算法示例/models/sequence_labeling/52m-f54.81n7192.16ccks2019_ner.pth'
     
     config_ner = ConfigNer()
     ner_model = SeqLabel(config_ner)
-    ner_model_dict = torch.load(PATH_NER)
-    ner_model.load_state_dict(ner_model_dict['state_dict'])
+    ner_model_dict = torch.load(PATH_NER, map_location ='cpu')
+    ner_model.load_state_dict(ner_model_dict['state_dict'], False)
     
     ner_data_process = ModelDataPreparation(config_ner)
     _, _, test_loader = ner_data_process.get_train_dev_data(path_test=test_path)
     
     # 补全1
     trainerNer = trainer_ner.Trainer(ner_model, config_ner, test_dataset=test_loader)
-    # pred_ner = trainerNer.predict()
-    raise NotImplementedError('补全输入方式')
+    pred_ner = trainerNer.predict()
+    # raise NotImplementedError('补全输入方式')
 
 
     # print(pred_ner)
@@ -83,7 +83,7 @@ def test():
     
     rel_list = []
     # 把从test json文件中选取的三含数据中抽取出来的实体，按格式写入rel_predict.json文件中
-    with open('D:/GitHub/8.2.2-1/1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
+    with open('/workspace/8.2.2-1/1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
         for i in range(len(pred_ner)):
             texti = text[i]
             for j in range(len(entities[i])): # entities是二维数组
@@ -100,14 +100,14 @@ def test():
 
     print("实体关系抽取：")
     # # 加载模型参数
-    PATH_REL = 'D:/GitHub/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
+    PATH_REL = '/workspace/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
-    rel_model = BertForSequenceClassification.from_pretrained('D:/GitHub/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
-    rel_model_dict = torch.load(PATH_REL)
-    rel_model.load_state_dict(rel_model_dict['state_dict'])
-    rel_test_path = 'D:/GitHub/8.2.2-1/1_算法示例/data/test_data.json' 
+    rel_model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
+    rel_model_dict = torch.load(PATH_REL, map_location ='cpu')
+    rel_model.load_state_dict(rel_model_dict['state_dict'], False)
+    rel_test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json' 
 
     rel_data_process = DataPreparationRel(config_rel)
     _, _, test_loader = rel_data_process.get_train_dev_data(path_test=rel_test_path) # 测试数据
@@ -115,8 +115,8 @@ def test():
     trainREL = trainer_rel.Trainer(rel_model, config_rel, test_dataset=test_loader)
     
     # 补全2
-    # rel_pred = trainREL.bert_predict()
-    raise NotImplementedError('补全输入方式')
+    rel_pred = trainREL.bert_predict()
+    # raise NotImplementedError('补全输入方式')
     
     return rel_pred
 
