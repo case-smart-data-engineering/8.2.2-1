@@ -9,30 +9,14 @@
 - modules：保存的是NER和REL的网络结构
 - solution：运行入口，test函数先运行实体识别，然后运行关系抽取。
 
-tips:
-1. 由于data文件夹中数据量很大，如果全部用来模型学习，训练过程和验证、测试过程会变得很耗费时间，所以如果为了跑通模型，可以使用数据切片，减少数据量。
-2. 另一个方式是使用GPU加速运行，可大幅缩减时间
-
 
 ### 模型下载
-1. 由于在github上无法通过引用的方式使用其他仓库的BERT等大型文件，所以建议离线运行
-2. 下载BERt模型放到./1_算法示例下，运行代码即可下载
-3. 下载已训练好的模型文件，用于直接运行solution.py文件进行测试
+1. bert模型采用的是bert-base-chinese(pytorch版本)，下载连接：
+2. 把下载的bert模型上传到"算法示例"目录下即可运行
+3. **下载**已训练好的模型文件并**上传**到指定路径下即可，用于直接运行solution.py文件进行测试
    1. ***_ner.pth文件，放置于路径models/sequence_labeling/
    2. ***_rel.pth文件，放置于路径models/rel_cls/
    3. 下载路径：https://github.com/KaiserLord/bigFiles/tree/master/models
-
-
-### 运行的环境
-```
-Python==3.7.15
-torch==1.5.1
-pytorch-crf==0.7.2
-pytorch-transformers==1.2.0
-```
-
-### 数据处理
-1. 运行data_loader中的数据处理文件
 
 
 ## 使用指南
@@ -51,10 +35,10 @@ pytorch-transformers==1.2.0
 如果有想要全部数据集的读者，可以从[https://pan.baidu.com/s/1XK3v6BQlnsvhGxgg-71IpA]下载json文件，密码'nlp0'，放置于`1_算法示例/data/`
 
 1. 训练
-Bert模型使用的是huggingface的Bert-base模型，命名实体部分的训练，直接运行mains/train_ner.py，关系抽取部分的训练，直接运行mains/train_rel.py
+Bert模型使用的是huggingface的Bert-base-chinese模型，命名实体部分的训练，直接运行mains/train_ner.py，关系抽取部分的训练，直接运行mains/train_rel.py
 
 1. 测试
-直接运行solution/solution.py，会首先进行命名实体识别，然后将实体两两组成实体对进行关系分类。
+直接运行deploy/solution.py，会首先进行命名实体识别，然后将实体两两组成实体对进行关系分类。
 
 
 ## 项目说明
