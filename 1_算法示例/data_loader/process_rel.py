@@ -3,14 +3,14 @@ import torch
 import sys
 import os
 
-sys.path.append('./1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 from config_utils.config_rel import ConfigRel, USE_CUDA
 
 import copy
 from transformers import BertTokenizer
 import codecs
 from collections import defaultdict
-basepath = 'D:/GitHub/8.2.2-1/'
+basepath = '/workspace/8.2.2-1/'
 
 class DataPreparationRel:
     def __init__(self, config):

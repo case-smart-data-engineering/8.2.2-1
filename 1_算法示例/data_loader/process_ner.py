@@ -7,7 +7,7 @@ import json
 import torch
 import copy
 import sys
-sys.path.append('D:/GitHub/8.2.2-1/1_算法示例/')
+sys.path.append('/workspace/8.2.2-1/1_算法示例/')
 
 from config_utils.config_ner import ConfigNer, USE_CUDA
 
@@ -271,7 +271,7 @@ class Dataset(torch.utils.data.Dataset):
 if __name__ == '__main__':
     config = ConfigNer()
     process = ModelDataPreparation(config)
-    train_loader, dev_loader, test_loader = process.get_train_dev_data('./1_算法示例/data/train_data.json')
+    train_loader, dev_loader, test_loader = process.get_train_dev_data('/workspace/8.2.2-1/1_算法示例/data/train_data.json')
     print(train_loader)
     for item in train_loader:
         print(item)
