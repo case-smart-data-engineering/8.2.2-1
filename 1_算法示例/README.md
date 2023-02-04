@@ -10,36 +10,16 @@
 - solution：运行入口，test函数先运行实体识别，然后运行关系抽取。
 
 
-### 模型下载
-1. bert模型采用的是bert-base-chinese(pytorch版本)，下载连接：
-2. 把下载的bert模型上传到"算法示例"目录下即可运行
+### 运行步骤
+1. 下载bert模型，采用的是bert-base-chinese(pytorch版本)，下载连接：https://huggingface.co/bert-base-chinese/tree/main
+2. 把下载的bert预训练模型(pytorch_model.bin文件)上传到"1_算法示例/bert-base-chinese"目录下即可运行data_loader/process_rel.py文件
 3. **下载**已训练好的模型文件并**上传**到指定路径下即可，用于直接运行solution.py文件进行测试
    1. ***_ner.pth文件，放置于路径models/sequence_labeling/
    2. ***_rel.pth文件，放置于路径models/rel_cls/
    3. 下载路径：https://github.com/KaiserLord/bigFiles/tree/master/models
 
-
-## 使用指南
-1. 按 CTRL + P 打开命令行面板，输入 terminal: Create New Terminal 打开一个命令行终端 或者按CTRL +直接打开命令行终端。
-如果快捷键没有反应，请手动点击最下面那行状态栏的第四个图标，然后在弹出的tab里点击TERMINAL打开命令行终端。
-2. 如果是在gitpod上运行本项目，会自动安装所需依赖包，手动安装方法如下： 在命令行里输入 `pip install -r requirements.txt` 按 ENTER 安装示例程序所需依赖库。
-3. 在命令行里输入 `cd 1_算法示例` 并按 `ENTER` 进入"算法示例"目录。
-4. 已经通过git lfs 上传模型文件至github上，gitpod无法访问，显示的是指针型文件，需要手动从github上下载放置于指定路径中或者将本项目克隆到本地运行。
-
-> 如果是在gitpod上运行，按以下步骤操作：
-> 下载预训练模型'*.pth'放置于'1_算法示例/models/'下,
-> 如果是克隆到本地运行，按以下步骤操作：
-> 直接把下载的pth文件复制粘贴于'1_算法示例/models/rel_cls/'下。
-
-1. 对于数据部分，由于github的限制，以及对想要测试模型的读者，github的项目中存放的是原始数据集的切片，这样便于在线化运行。
+> 对于数据部分，由于github的限制，以及对想要测试模型的读者，github的项目中存放的是原始数据集的切片，这样便于在线化运行。
 如果有想要全部数据集的读者，可以从[https://pan.baidu.com/s/1XK3v6BQlnsvhGxgg-71IpA]下载json文件，密码'nlp0'，放置于`1_算法示例/data/`
-
-1. 训练
-Bert模型使用的是huggingface的Bert-base-chinese模型，命名实体部分的训练，直接运行mains/train_ner.py，关系抽取部分的训练，直接运行mains/train_rel.py
-
-1. 测试
-直接运行deploy/solution.py，会首先进行命名实体识别，然后将实体两两组成实体对进行关系分类。
-
 
 ## 项目说明
 项目分两部分：
@@ -65,13 +45,6 @@ Bert模型使用的是huggingface的Bert-base-chinese模型，命名实体部分
   "subject": "北风那个吹"
   }]
 }
-
-- 数据集的下载
-链接：https://pan.baidu.com/s/1XK3v6BQlnsvhGxgg-71IpA 
-提取码：nlp0 
-
-- 预训练模型和相关文件见
-https://huggingface.co/bert-base-chinese/tree/main
 
 ## 运行结果
 在训练完后会在`1_算法示例/models/`路径下保存训练结果，然后运行demo.py文件，会得到关系类别的预测结果
