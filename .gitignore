@@ -131,5 +131,5 @@ dmypy.json
 
 models/rel_cls/*.pth
 models/sequence_labeling/*.pth
-bert-base-chinese/
+bert-base-chinese/pytorch_model.bin
 
