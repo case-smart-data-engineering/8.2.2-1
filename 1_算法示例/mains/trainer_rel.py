@@ -97,7 +97,7 @@ class Trainer:
             self.id2rel[i] = rel
 
     def predict(self):
-        print('STARTING PREDICTING...')
+        # print('STARTING PREDICTING...')
         self.model.train(False)
         pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
         for i, data_item in pbar:
@@ -110,7 +110,7 @@ class Trainer:
         return rel_pred
 
     def bert_train(self):
-        print('STARTING TRAIN...')
+        # print('STARTING TRAIN...')
         self.num_sample_total = len(self.train_dataset) * self.config.batch_size
         acc_best = 0.0
         for epoch in range(self.config.epochs):
@@ -152,7 +152,7 @@ class Trainer:
                     )
 
     def bert_evaluate(self):
-        print('STARTING EVALUATION...')
+        # print('STARTING EVALUATION...')
         self.model.train(False)
         pbar_dev = tqdm(enumerate(self.dev_dataset), total=len(self.dev_dataset))
 
@@ -201,7 +201,7 @@ class Trainer:
         return rel_pred
 
     def bert_predict(self):
-        print('STARTING PREDICTING...')
+        # print('STARTING PREDICTING...')
         self.model.train(False)
         pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
         # print(type(pbar))

@@ -117,7 +117,7 @@ class Trainer:
         # return loss_ner_total / (len(self.dev_dataset) * self.config.batch_size)
     
     def predict(self):
-        print('STARTING PREDICTING...')
+        # print('STARTING PREDICTING...')
         self.model.train(False)
         pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
         for i, data_item in pbar:

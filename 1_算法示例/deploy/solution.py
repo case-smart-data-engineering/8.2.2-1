@@ -13,7 +13,9 @@ from data_loader.process_rel import DataPreparationRel
 from mains import trainer_ner, trainer_rel
 import json
 from transformers import BertForSequenceClassification
-
+from transformers import logging
+logging.set_verbosity_warning()
+logging.set_verbosity_error()
 
 def get_entities(pred_ner, text):
     token_types = [[] for _ in range(len(pred_ner))]
@@ -61,12 +63,11 @@ def test():
 
     trainerNer = trainer_ner.Trainer(ner_model, config_ner, test_dataset=test_loader)
     pred_ner = trainerNer.predict()
-    # print(pred_ner)
     text = None
     for data_item in test_loader:
         text = data_item['text']
     token_types, entities = get_entities(pred_ner, text)
-    # print(token_types)
+    print(text)
     print('识别出来的实体如下:')
     print(entities)
     
@@ -95,7 +96,7 @@ def test():
     # config_rel.batch_size = 8
     rel_model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
     rel_model_dict = torch.load(PATH_REL, map_location ='cpu')
-    print(rel_model_dict.keys())
+    # print(rel_model_dict.keys())
     rel_model.load_state_dict(rel_model_dict['state_dict'], False)
     rel_test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json' 
 
