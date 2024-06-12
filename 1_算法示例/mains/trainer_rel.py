@@ -1,112 +1,260 @@
-import torch
+# coding=utf-8
 import sys
+import torch
+import torch.nn as nn
+from tqdm import tqdm
 
 sys.path.append('/workspace/8.2.2-1/1_算法示例/')
-from modules.model_ner import SeqLabel
-from modules.model_rel import AttBiLSTM
 from config_utils.config_rel import ConfigRel, USE_CUDA
-from config_utils.config_ner import ConfigNer, USE_CUDA
-
-from data_loader.process_ner import ModelDataPreparation
+from modules.model_rel import AttBiLSTM
 from data_loader.process_rel import DataPreparationRel
-
-from mains import trainer_ner, trainer_rel
-import json
+import numpy as np
+import codecs
 from transformers import BertForSequenceClassification
-from transformers import logging
-logging.set_verbosity_warning()
-logging.set_verbosity_error()
+import neptune
 
-def get_entities(pred_ner, text):
-    token_types = [[] for _ in range(len(pred_ner))]
-    entities = [[] for _ in range(len(pred_ner))]
-    for i in range(len(pred_ner)):
-        token_type = []
-        entity = []
-        j = 0
-        word_begin = False
-        while j < len(pred_ner[i]):
-            if pred_ner[i][j][0] == 'B':
-                if word_begin:
-                    token_type = []  # 防止多个B出现在一起
-                    entity = []
-                token_type.append(pred_ner[i][j])
-                entity.append(text[i][j])
-                word_begin = True
-            elif pred_ner[i][j][0] == 'I':
-                if word_begin:
-                    token_type.append(pred_ner[i][j])
-                    entity.append(text[i][j])
-            else:
-                if word_begin:
-                    token_types[i].append(''.join(token_type))
-                    token_type = []
-                    entities[i].append(''.join(entity))
-                    entity = []
-                word_begin = False
-            j += 1
-    return token_types, entities
-
-def test():
-    print("命名实体识别：")
-    test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json'
-    PATH_NER =  '/workspace/8.2.2-1/1_算法示例/models/sequence_labeling/2m-f0.00n26393.14ccks2019_ner.pth'
+rel_pth = '' #保存训练文件
+class Trainer:
     
-    config_ner = ConfigNer()
-    ner_model = SeqLabel(config_ner)
-    ner_model_dict = torch.load(PATH_NER, map_location ='cpu')
-    ner_model.load_state_dict(ner_model_dict['state_dict'])
-    
-    ner_data_process = ModelDataPreparation(config_ner)
-    _, _, test_loader = ner_data_process.get_train_dev_data(path_test=test_path)
-    
+    def __init__(self,
+                 model,
+                 config,
+                 train_dataset=None,
+                 dev_dataset=None,
+                 test_dataset=None
+                 ):
+        self.model = model
+        self.config = config
+        self.train_dataset = train_dataset
+        self.dev_dataset = dev_dataset
+        self.test_dataset = test_dataset
+        
+        
+        self.optimizer = torch.optim.SGD(self.model.parameters(), lr=config.lr)
+        self.scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(self.optimizer, factor=0.5,
+                                                                    patience=8, min_lr=1e-5, verbose=True)
+        self.get_id2rel()
+        
+    def train(self):
+        print('STARTING TRAIN...')
+        self.num_sample_total = len(self.train_dataset) * self.config.batch_size
+        loss_eval_best = 1e8
+        for epoch in range(self.config.epochs):
+            print("Epoch: {}".format(epoch))
+            pbar = tqdm(enumerate(self.train_dataset), total=len(self.train_dataset))
+            loss_rel_total = 0.0
+            self.optimizer.zero_grad()
+            # with torch.no_grad():
+            for i, data_item in pbar:
+                loss_rel, pred_rel = self.model(data_item)
+                loss_rel.backward()
+                self.optimizer.step()
 
-    trainerNer = trainer_ner.Trainer(ner_model, config_ner, test_dataset=test_loader)
-    pred_ner = trainerNer.predict()
-    text = None
-    for data_item in test_loader:
-        text = data_item['text']
-    token_types, entities = get_entities(pred_ner, text)
-    print(text)
-    print('识别出来的实体如下:')
-    print(entities)
+                loss_rel_total += loss_rel
+                break
+            loss_rel_train_ave = loss_rel_total / self.num_sample_total
+            print("train rel loss: {0}".format(loss_rel_train_ave))
+            neptune.log_metric("train rel loss", loss_rel_train_ave)
+            if (epoch + 1) % 1 == 0:
+                loss_rel_ave = self.evaluate()
+
+            if epoch > 0 and (epoch+1) % 2 == 0:
+                loss_eval_best = loss_rel_ave
+                torch.save({
+                    'epoch': epoch + 1, 'state_dict': self.model.state_dict(), 'loss_rel_best': loss_eval_best,
+                    'optimizer': self.optimizer.state_dict(),
+                },
+                    self.config.rel_checkpoint_path + str(epoch) + 'm-' + 'loss' +
+                    str("%.2f" % loss_rel_ave) + 'ccks2019_rel.pth'
+                )
+            rel_pth = self.config.rel_checkpoint_path + str(epoch) + 'm-' + 'loss' + str("%.2f" % loss_rel_ave) + 'ccks2019_rel.pth'
     
-    rel_list = []
-    # 把从test json文件中选取的三含数据中抽取出来的实体，按格式写入rel_predict.json文件中
-    with open('/workspace/8.2.2-1/1_算法示例/deploy/rel_predict.json', 'w', encoding='utf-8') as f:
-        for i in range(len(pred_ner)):
-            texti = text[i]
-            for j in range(len(entities[i])): # entities是二维数组
-                for k in range(len(entities[i])):
-                    if j == k:
-                        continue
-                    # rel_list.append({"text":texti, "spo_list":{"subject": entities[i][j], "object": entities[i][k]}})
-                    subject = entities[i][j]
-                    object = entities[i][k]
-                    relation = ''
-                    sentence_cls = ''.join([subject, object, texti])
-                    rel_list.append({"sentence_cls":sentence_cls, 'relation': relation, 'text': texti, "subject": subject, "object": object})
-        json.dump(rel_list, f, ensure_ascii=False)
-
-    print("实体关系抽取：")
-    # # 加载模型参数
-    PATH_REL = '/workspace/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.75ccks2019_rel.pth'
+    def evaluate(self):
+        print('STARTING EVALUATION...')
+        self.model.train(False)
+        pbar_dev = tqdm(enumerate(self.dev_dataset), total=len(self.dev_dataset))
     
-    config_rel = ConfigRel()
-    # config_rel.batch_size = 8
-    rel_model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config_rel.num_relations)
-    rel_model_dict = torch.load(PATH_REL, map_location ='cpu')
-    # print(rel_model_dict.keys())
-    rel_model.load_state_dict(rel_model_dict['state_dict'], False)
-    rel_test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json' 
+        loss_rel_total = 0
+        for i, data_item in pbar_dev:
+            loss_rel, pred_rel = self.model(data_item)
+            loss_rel_total += loss_rel
 
-    rel_data_process = DataPreparationRel(config_rel)
-    _, _, test_loader = rel_data_process.get_train_dev_data(path_test=rel_test_path) # 测试数据
+        
+        self.model.train(True)
+        loss_rel_ave = loss_rel_total / (len(self.dev_dataset) * self.config.batch_size)
+        print("eval rel loss: {0}".format(loss_rel_ave))
+        
+        print(data_item['text'][1])
+        print("subject: {0}, object：{1}".format(data_item['subject'][1], data_item['object'][1]))
+        print("object rel: {}".format(self.id2rel[int(data_item['relation'][1])]))
+        print("predict rel: {}".format(self.id2rel[int(pred_rel[1])]))
+        return loss_rel_ave
+    
+    def get_id2rel(self):
+        self.id2rel = {}
+        for i, rel in enumerate(self.config.relations):
+            self.id2rel[i] = rel
 
-    trainREL = trainer_rel.Trainer(rel_model, config_rel, test_dataset=test_loader)
-    rel_pred = trainREL.bert_predict()
-    return rel_pred
+    def predict(self):
+        # print('STARTING PREDICTING...')
+        self.model.train(False)
+        pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
+        for i, data_item in pbar:
+            pred_rel = self.model(data_item, is_test=True)
+        self.model.train(True)
+        rel_pred = [[] for _ in range(len(pred_rel))]
+        for i in range(len(pred_rel)):
+            # for item in pred_rel[i]:
+            rel_pred[i].append(self.id2rel[int(pred_rel[i])])
+        return rel_pred
+
+    def bert_train(self):
+        # print('STARTING TRAIN...')
+        self.num_sample_total = len(self.train_dataset) * self.config.batch_size
+        acc_best = 0.0
+        for epoch in range(self.config.epochs):
+            print("Epoch: {}".format(epoch))
+            pbar = tqdm(enumerate(self.train_dataset), total=len(self.train_dataset))
+            loss_rel_total = 0.0
+            self.optimizer.zero_grad()
+
+            correct = 0
+            # with torch.no_grad():
+            for i, data_item in pbar:
+                self.optimizer.zero_grad()
+                output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'], labels=data_item['relation'])
+                loss_rel, logits = output[0], output[1]
+                loss_rel.backward()
+                self.optimizer.step()
+
+                _, pred_rel = torch.max(logits.data, 1)
+                correct += pred_rel.data.eq(data_item['relation'].data).cpu().sum().numpy()
+
+                loss_rel_total += loss_rel
+
+            loss_rel_train_ave = loss_rel_total / self.num_sample_total
+            print("train rel loss: {0}".format(loss_rel_train_ave))
+            # neptune.log_metric("train rel loss", loss_rel_train_ave)
+            print("precision_score: {0}".format(correct / self.num_sample_total))
+            if (epoch + 1) % 1 == 0:
+                acc_eval = self.bert_evaluate()
+
+            if epoch > 0 and (epoch + 1) % 2 == 0:
+                if acc_eval > acc_best:
+                    acc_best = acc_eval
+                    torch.save({
+                        'epoch': epoch + 1, 'state_dict': self.model.state_dict(), 'acc_best': acc_best,
+                        'optimizer': self.optimizer.state_dict(),
+                    },
+                        self.config.rel_checkpoint_path + str(epoch) + 'm-' + 'acc' +
+                        str("%.2f" % acc_best) + 'ccks2019_rel.pth'
+                    )
+
+    def bert_evaluate(self):
+        # print('STARTING EVALUATION...')
+        self.model.train(False)
+        pbar_dev = tqdm(enumerate(self.dev_dataset), total=len(self.dev_dataset))
+
+        loss_rel_total = 0
+        correct = 0
+        with torch.no_grad():
+            for i, data_item in pbar_dev:
+                output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'], labels=data_item['relation'])
+                loss_rel, logits = output[0], output[1]
+                _, pred_rel = torch.max(logits.data, 1)
+                loss_rel_total += loss_rel
+                correct += pred_rel.data.eq(data_item['relation'].data).cpu().sum().numpy()
+
+
+
+        self.model.train(True)
+        loss_rel_ave = loss_rel_total / (len(self.dev_dataset) * self.config.batch_size)
+        correct_ave = correct / (len(self.dev_dataset) * self.config.batch_size)
+        print("eval rel loss: {0}".format(loss_rel_ave))
+        print("precision_score: {0}".format(correct_ave))
+        return correct_ave
+
+    def bert_predict2(self):
+        print('STARTING PREDICTING...')
+        self.model.train(False)
+        pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
+        # print(type(pbar))
+        pred_list = []
+        for i, data_item in pbar:
+            output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'])
+            logits = output[0]
+            _, pred_rel = torch.max(logits.data, 1)
+            pred_list.append(pred_rel)
+
+        self.model.train(True)
+        # rel_pred = [[] for _ in range(len(pred_rel))]
+        rel_pred = []
+        for i in range(len(pred_rel)):
+            # for item in pred_rel[i]:
+            rel_pred.append(self.id2rel[int(pred_rel[i])])
+        return rel_pred
+
+    def bert_predict(self):
+        # print('STARTING PREDICTING...')
+        self.model.train(False)
+        pbar = tqdm(enumerate(self.test_dataset), total=len(self.test_dataset))
+        # print(type(pbar))
+        result = []
+        pred_list = []
+        for i, data_item in pbar:
+            output = self.model(data_item['sentence_cls'], attention_mask=data_item['mask_tokens'])
+            logits = output[0]
+            _, pred_rel = torch.max(logits.data, 1)
+            pred_list.append(pred_rel)
+            result.append([data_item['subject'], '', data_item['object']]) #三元组
+
+        self.model.train(True)
+        # rel_pred = [[] for _ in range(len(pred_rel))]
+        # rel_pred = []
+        for i in range(len(pred_list)):
+            # for item in pred_rel[i]:
+            # rel_pred.append(self.id2rel[int(pred_list[i])])
+            # 可以在这里更改一下输出的格式
+            result[i][1] = self.id2rel[int(pred_list[i])]
+        return result
+
+def get_embedding_pre():
+    
+    word2id = {}
+    with codecs.open('/workspace/8.2.2-1/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+        cnt = 0
+        for line in f.readlines():
+            word2id[line.split()[0]] = cnt
+            cnt += 1
+
+    word2vec = {}
+    with codecs.open('/workspace/8.2.2-1/1_算法示例/data/vec.txt', 'r', encoding='utf-8') as f:
+        for line in f.readlines():
+            word2vec[line.split()[0]] = list(map(eval, line.split()[1:]))
+        unkown_pre = []
+        unkown_pre.extend([1]*100)
+    embedding_pre = []
+    embedding_pre.append(unkown_pre)
+    for word in word2id:
+        if word in word2vec:
+            embedding_pre.append(word2vec[word])
+        else:
+            embedding_pre.append(unkown_pre)
+    embedding_pre = np.array(embedding_pre)
+    return embedding_pre
+
 
 if __name__ == '__main__':
-    res = test()
-    print(res)
+
+    print("Run EntityRelationExtraction REL BERT ...")
+    config = ConfigRel()
+    model = BertForSequenceClassification.from_pretrained('/workspace/8.2.2-1/1_算法示例/bert-base-chinese', num_labels=config.num_relations)
+    data_processor = DataPreparationRel(config)
+    train_loader, dev_loader, test_loader = data_processor.get_train_dev_data(
+        '/workspace/8.2.2-1/1_算法示例/data/train_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/dev_data.json', 
+        '/workspace/8.2.2-1/1_算法示例/data/test_data.json')
+
+    trainer = Trainer(model, config, train_loader, dev_loader, test_loader)
+    trainer.bert_train()
+    
