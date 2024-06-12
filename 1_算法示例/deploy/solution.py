@@ -50,7 +50,7 @@ def get_entities(pred_ner, text):
 def test():
     print("命名实体识别：")
     test_path = '/workspace/8.2.2-1/1_算法示例/data/test_data.json'
-    PATH_NER =  '/workspace/8.2.2-1/1_算法示例/models/sequence_labeling/52m-f54.81n7192.16ccks2019_ner.pth'
+    PATH_NER =  '/workspace/8.2.2-1/1_算法示例/models/sequence_labeling/2m-f0.00n26393.14ccks2019_ner.pth'
     
     config_ner = ConfigNer()
     ner_model = SeqLabel(config_ner)
@@ -90,7 +90,7 @@ def test():
 
     print("实体关系抽取：")
     # # 加载模型参数
-    PATH_REL = '/workspace/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.79ccks2019_rel.pth'
+    PATH_REL = '/workspace/8.2.2-1/1_算法示例/models/rel_cls/1m-acc0.75ccks2019_rel.pth'
     
     config_rel = ConfigRel()
     # config_rel.batch_size = 8
