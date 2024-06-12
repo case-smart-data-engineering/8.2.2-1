@@ -12,11 +12,11 @@
 
 ### 运行步骤
 1. 下载bert模型，采用的是bert-base-chinese(pytorch版本)，下载连接：https://huggingface.co/bert-base-chinese/tree/main 。
-2. 把下载的bert预训练模型(pytorch_model.bin文件)上传到"1_算法示例/bert-base-chinese"目录下即可运行data_loader/process_rel.py文件。
-3. `下载`已训练好的模型文件并`上传`到指定路径下即可，用于直接运行solution.py文件进行测试。
+2. 把下载的bert预训练模型(pytorch_model.bin文件)上传到"1_算法示例/bert-base-chinese"目录下即可运行data_loader/process_ner.py文件和process_rel.py。
+3. 将已训练好的模型文件放到指定路径下，用于直接运行solution.py文件进行测试。
    1. xx_ner.pth文件，放置于路径models/sequence_labeling/ 。
    2. xx_rel.pth文件，放置于路径models/rel_cls/ 。
-   3. 下载路径：https://github.com/KaiserLord/bigFiles/tree/master/models 。
+   3. models文件夹中已给出模型文件示例，可直接运行solution.py文件进行测试。
 
 > 对于数据部分，由于github的限制，以及对想要测试模型的读者，github的项目中存放的是原始数据集的切片，这样便于在线化运行。如果有想要全部数据集的读者，可以从[https://pan.baidu.com/s/1XK3v6BQlnsvhGxgg-71IpA]下载json文件，密码'nlp0'，放置于`1_算法示例/data/` 。
 
