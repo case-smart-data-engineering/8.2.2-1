@@ -84,11 +84,6 @@ class Trainer:
         self.model.train(True)
         loss_rel_ave = loss_rel_total / (len(self.dev_dataset) * self.config.batch_size)
         print("eval rel loss: {0}".format(loss_rel_ave))
-        
-        print(data_item['text'][1])
-        print("subject: {0}, object：{1}".format(data_item['subject'][1], data_item['object'][1]))
-        print("object rel: {}".format(self.id2rel[int(data_item['relation'][1])]))
-        print("predict rel: {}".format(self.id2rel[int(pred_rel[1])]))
         return loss_rel_ave
     
     def get_id2rel(self):
@@ -140,16 +135,15 @@ class Trainer:
             if (epoch + 1) % 1 == 0:
                 acc_eval = self.bert_evaluate()
 
-            if epoch > 0 and (epoch + 1) % 2 == 0:
-                if acc_eval > acc_best:
-                    acc_best = acc_eval
-                    torch.save({
-                        'epoch': epoch + 1, 'state_dict': self.model.state_dict(), 'acc_best': acc_best,
-                        'optimizer': self.optimizer.state_dict(),
-                    },
-                        self.config.rel_checkpoint_path + str(epoch) + 'm-' + 'acc' +
-                        str("%.2f" % acc_best) + 'ccks2019_rel.pth'
-                    )
+            if epoch > 0:
+                acc_best = acc_eval
+                torch.save({
+                    'epoch': epoch + 1, 'state_dict': self.model.state_dict(), 'acc_best': acc_best,
+                    'optimizer': self.optimizer.state_dict(),
+                },
+                    self.config.rel_checkpoint_path + str(epoch) + 'm-' + 'acc' +
+                    str("%.2f" % acc_best) + 'ccks2019_rel.pth'
+                )
 
     def bert_evaluate(self):
         # print('STARTING EVALUATION...')
