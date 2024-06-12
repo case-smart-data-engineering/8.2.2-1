@@ -1,5 +1,5 @@
 # List the start up tasks. Learn more https://www.gitpod.io/docs/config-start-tasks/
-# 使用一个带有 Python 3.6 的预构建镜像
+# 使用一个带有 Python 3.8 的预构建镜像
 image:
        gitpod/workspace-full:latest
 tasks:
