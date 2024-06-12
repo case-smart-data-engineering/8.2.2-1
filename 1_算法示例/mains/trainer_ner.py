@@ -68,7 +68,7 @@ class Trainer:
 
             if (epoch+1) % 1 == 0:
                 self.evaluate()
-            if epoch > 9 and f1_ner_total >= f1_ner_total_best:
+            if epoch > 0:
                 f1_ner_total_best = f1_ner_total
                 torch.save({
                     'epoch': epoch+1, 'state_dict': self.model.state_dict(), 'f1_best': f1_ner_total,
