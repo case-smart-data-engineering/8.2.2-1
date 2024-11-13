@@ -1,4 +1,4 @@
-# 案例名称
+# 基于BERT-BiLSTM-Softmax的关系抽取算法
 
 ## 算法演示
 
